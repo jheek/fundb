@@ -17,11 +17,12 @@
 --------------------------------------------------------------------------------
 module SmallArray (
   SmallArray(..), SmallMutableArray(..),
-  newSmallArray, readSmallArray, writeSmallArray, indexSmallArray, indexSmallArrayM,
+  newSmallArray, emptySmallArray, readSmallArray, writeSmallArray, indexSmallArray, indexSmallArrayM,
   unsafeFreezeSmallArray, unsafeThawSmallArray, sameSmallMutableArray,
   copySmallArray, copySmallMutableArray,
   cloneSmallArray, cloneSmallMutableArray,
   insertSmallArray, insertSmallMutableArray, replaceSmallArray, bsearch, bsearch', SearchIndex(..),
+  removeSmallArray, removeSmallMutableArray,
   sizeOfSmallArray, sizeOfSmallMutableArray
 ) where
 
@@ -36,6 +37,11 @@ data SmallArray a = SmallArray (SmallArray# a)
 
 -- | Mutable boxed arrays associated with a primitive state token.
 data SmallMutableArray s a = SmallMutableArray (SmallMutableArray# s a)
+
+emptySmallArray :: SmallArray a
+emptySmallArray = runST $ do
+  mut <- newSmallArray 0 undefined
+  unsafeFreezeSmallArray mut
 
 -- | Create a new mutable array of the specified size and initialise all
 -- elements with the given value.
@@ -198,9 +204,32 @@ insertSmallArray ar ind val = runST $ do
   mut <- insertSmallMutableArray ar ind val
   unsafeFreezeSmallArray mut
 
+-- | removes a value at the give position and returns a mutable array
+removeSmallMutableArray :: (PrimMonad m)
+  => SmallArray a -- ^ source array
+  -> Int -- ^ remove position
+  -> m (SmallMutableArray (PrimState m) a) -- ^ mutable array which is 1 element longer than the source array
+{-# INLINE removeSmallMutableArray #-}
+removeSmallMutableArray ar ind = do
+  let s = sizeOfSmallArray ar
+  mut <- newSmallArray (s - 1) undefined
+  copySmallArray mut 0 ar 0 ind
+  copySmallArray mut ind ar (ind+1) (s - ind - 1)
+  return $! mut
+
+-- | remove a value at given index
+removeSmallArray :: ()
+  => SmallArray a -- ^ source array
+  -> Int -- ^ remove position
+  -> SmallArray a
+{-# INLINE removeSmallArray #-}
+removeSmallArray ar ind = runST $ do
+  mut <- removeSmallMutableArray ar ind
+  unsafeFreezeSmallArray mut 
+
 -- | Result of an index search. 
-data SearchIndex = Found Int -- ^ key was found at given index
-                 | Lost Int -- ^ key was not found and should be inserted at given index to keep the array ordered
+data SearchIndex = Found {-# UNPACK #-} !Int -- ^ key was found at given index
+                 | Lost {-# UNPACK #-} !Int -- ^ key was not found and should be inserted at given index to keep the array ordered
 
 -- | Binary search for given key.
 --   Asserts array to be ordered.

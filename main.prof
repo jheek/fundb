@@ -1,0 +1,55 @@
+	Sat Jul 22 21:27 2017 Time and Allocation Profiling Report  (Final)
+
+	   main +RTS -N -N1 -p -RTS
+
+	total time  =        1.91 secs   (1906 ticks @ 1000 us, 1 processor)
+	total alloc = 2,991,885,904 bytes  (excludes profiling overheads)
+
+COST CENTRE MODULE                  SRC                                  %time %alloc
+
+main.m      Main                    app/Main.hs:7:9-45                    63.0   77.8
+primitive   Control.Monad.Primitive Control/Monad/Primitive.hs:152:3-16   36.7   22.2
+
+
+                                                                                                    individual      inherited
+COST CENTRE          MODULE                  SRC                                 no.     entries  %time %alloc   %time %alloc
+
+MAIN                 MAIN                    <built-in>                          208          0    0.2    0.0   100.0  100.0
+ CAF                 GHC.Conc.Signal         <entire-module>                     300          0    0.0    0.0     0.0    0.0
+ CAF                 GHC.IO.Encoding         <entire-module>                     282          0    0.0    0.0     0.0    0.0
+ CAF                 GHC.IO.Encoding.Iconv   <entire-module>                     280          0    0.0    0.0     0.0    0.0
+ CAF                 GHC.IO.Handle.FD        <entire-module>                     271          0    0.0    0.0     0.0    0.0
+ CAF                 GHC.IO.Handle.Text      <entire-module>                     269          0    0.0    0.0     0.0    0.0
+ CAF                 GHC.Show                <entire-module>                     253          0    0.0    0.0     0.0    0.0
+ CAF                 GHC.Event.Poll          <entire-module>                     225          0    0.0    0.0     0.0    0.0
+ CAF                 GHC.Event.Thread        <entire-module>                     224          0    0.0    0.0     0.0    0.0
+ CAF:benchSize       Main                    app/Main.hs:21:1-9                  406          0    0.0    0.0     0.0    0.0
+  benchSize          Main                    app/Main.hs:21:1-19                 426          1    0.0    0.0     0.0    0.0
+ CAF:empty           Map                     src/Map.hs:58:1-5                   385          0    0.0    0.0     0.0    0.0
+  empty              Map                     src/Map.hs:58:1-62                  428          1    0.0    0.0     0.0    0.0
+ CAF:emptySmallArray SmallArray              src/SmallArray.hs:42:1-15           364          0    0.0    0.0     0.0    0.0
+  emptySmallArray    SmallArray              src/SmallArray.hs:(42,1)-(44,28)    429          1    0.0    0.0     0.0    0.0
+   primitive         Control.Monad.Primitive Control/Monad/Primitive.hs:152:3-16 430          2    0.0    0.0     0.0    0.0
+ CAF:main1           Main                    <no location info>                  414          0    0.0    0.0     0.0    0.0
+  main               Main                    app/Main.hs:(6,1)-(8,21)            416          1    0.0    0.0     0.0    0.0
+ CAF:main2           Main                    <no location info>                  413          0    0.0    0.0     0.0    0.0
+  main               Main                    app/Main.hs:(6,1)-(8,21)            418          0    0.0    0.0     0.0    0.0
+ CAF:main4           Main                    <no location info>                  412          0    0.0    0.0     0.1    0.0
+  main               Main                    app/Main.hs:(6,1)-(8,21)            419          0    0.1    0.0     0.1    0.0
+   findMin           Map                     src/Map.hs:(89,1)-(90,79)           421          5    0.0    0.0     0.0    0.0
+   main.m            Main                    app/Main.hs:7:9-45                  420          1    0.0    0.0     0.0    0.0
+ CAF:main5           Main                    <no location info>                  411          0    0.0    0.0    98.7   97.3
+  main               Main                    app/Main.hs:(6,1)-(8,21)            422          0    0.0    0.0    98.7   97.3
+   main.m            Main                    app/Main.hs:7:9-45                  423          0   62.0   75.2    98.7   97.3
+    primitive        Control.Monad.Primitive Control/Monad/Primitive.hs:152:3-16 431   22279929   36.7   22.2    36.7   22.2
+    keys             Map                     src/Map.hs:37:7-10                  427    4822524    0.0    0.0     0.0    0.0
+    vals             Map                     src/Map.hs:38:7-10                  432    4822524    0.0    0.0     0.0    0.0
+    childs           Map                     src/Map.hs:42:7-12                  437    3822524    0.0    0.0     0.0    0.0
+    fromListN        SmallArray              src/SmallArray.hs:(277,3)-(282,30)  433         12    0.0    0.0     0.0    0.0
+     fromListN.go    SmallArray              src/SmallArray.hs:(279,9)-(280,60)  435         28    0.0    0.0     0.0    0.0
+      primitive      Control.Monad.Primitive Control/Monad/Primitive.hs:152:3-16 436         16    0.0    0.0     0.0    0.0
+     primitive       Control.Monad.Primitive Control/Monad/Primitive.hs:152:3-16 434         24    0.0    0.0     0.0    0.0
+ CAF:main6           Main                    <no location info>                  407          0    0.0    0.0     1.0    2.7
+  main               Main                    app/Main.hs:(6,1)-(8,21)            424          0    0.0    0.0     1.0    2.7
+   main.m            Main                    app/Main.hs:7:9-45                  425          0    1.0    2.7     1.0    2.7
+ main                Main                    app/Main.hs:(6,1)-(8,21)            417          0    0.1    0.0     0.1    0.0
