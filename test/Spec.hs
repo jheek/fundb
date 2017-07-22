@@ -19,8 +19,6 @@ test = hspec $ do
     it "entries should be ordered" $ property prop_OrderedEntries
     it "should allow items to be inserted" $
       ((insert empty 1 1) :: Map Int Int) `shouldBe` Leave {keys = [1], vals = [1]}
-    -- it "should allow many items to be inserted" $
-    --   ((makeList items) :: Map Int Int) `shouldBe` Leave {keys = [1..10], vals = [9,8..0]}
 
 main :: IO ()
 main = do
