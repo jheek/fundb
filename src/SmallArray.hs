@@ -21,7 +21,7 @@ module SmallArray (
   unsafeFreezeSmallArray, unsafeThawSmallArray, sameSmallMutableArray,
   copySmallArray, copySmallMutableArray,
   cloneSmallArray, cloneSmallMutableArray,
-  insertSmallArray, insertSmallMutableArray, replaceSmallArray,
+  insertSmallArray, insertSmallMutableArray, replaceSmallArray, bsearch, bsearch', SearchIndex(..),
   sizeOfSmallArray, sizeOfSmallMutableArray
 ) where
 
@@ -162,15 +162,22 @@ cloneSmallMutableArray (SmallMutableArray arr#) (I# off#) (I# len#) = primitive
    (\s# -> case cloneSmallMutableArray# arr# off# len# s# of
              (# s'#, arr'# #) -> (# s'#, SmallMutableArray arr'# #))
 
+-- | size of small array
 sizeOfSmallArray :: SmallArray a -> Int
 {-# INLINE sizeOfSmallArray #-}
 sizeOfSmallArray (SmallArray ar) = I# (sizeofSmallArray# ar)
 
+-- | size of small mutable array
 sizeOfSmallMutableArray :: (forall m. (SmallMutableArray m a)) -> Int
 {-# INLINE sizeOfSmallMutableArray #-}
 sizeOfSmallMutableArray (SmallMutableArray ar) = I# (sizeofSmallMutableArray# ar)
 
-insertSmallMutableArray :: PrimMonad m => SmallArray a -> Int -> a -> m (SmallMutableArray (PrimState m) a)
+-- | insert a value at the give position and returns a mutable array
+insertSmallMutableArray :: (PrimMonad m)
+  => SmallArray a -- ^ source array
+  -> Int -- ^ insert position
+  -> a -- ^ insert value
+  -> m (SmallMutableArray (PrimState m) a) -- ^ mutable array which is 1 element longer than the source array
 {-# INLINE insertSmallMutableArray #-}
 insertSmallMutableArray ar ind val = do
   let s = sizeOfSmallArray ar
@@ -180,14 +187,54 @@ insertSmallMutableArray ar ind val = do
   copySmallArray mut (ind+1) ar ind (s-ind)
   return $! mut
 
-insertSmallArray :: SmallArray a -> Int -> a -> SmallArray a
+-- | insert a value at given index
+insertSmallArray :: ()
+  => SmallArray a -- ^ source array
+  -> Int -- ^ insert position
+  -> a -- ^ insert value
+  -> SmallArray a
 {-# INLINE insertSmallArray #-}
 insertSmallArray ar ind val = runST $ do
   mut <- insertSmallMutableArray ar ind val
   unsafeFreezeSmallArray mut
 
+-- | Result of an index search. 
+data SearchIndex = Found Int -- ^ key was found at given index
+                 | Lost Int -- ^ key was not found and should be inserted at given index to keep the array ordered
 
-replaceSmallArray :: SmallArray a -> Int -> a -> SmallArray a
+-- | Binary search for given key.
+--   Asserts array to be ordered.
+bsearch :: Ord k => SmallArray k -> k -> SearchIndex
+{-# INLINE bsearch #-}
+bsearch ar key = bsearch' ar key 0 ((sizeOfSmallArray ar) - 1)
+
+-- | Binary search for given key between start and end positions.
+--   Asserts array to be ordered.
+bsearch' :: Ord k 
+  => SmallArray k -- ^ source array
+  -> k -- ^ search key
+  -> Int -- ^ start position (inclusive)
+  -> Int -- ^ end position (inclusive)
+  -> SearchIndex
+{-# INLINE bsearch' #-}
+bsearch' ar key start end
+  | start > end = Lost start
+  | otherwise   = case key `compare` piv of
+    LT -> bs start (mid - 1)
+    GT -> bs (mid + 1) end
+    EQ -> Found mid
+  where 
+    mid = (start + end) `div` 2
+    piv = indexSmallArray ar mid
+    bs = bsearch' ar key
+
+-- | replace a single value
+replaceSmallArray :: 
+     SmallArray a  -- ^ source array
+  -> Int -- ^ position
+  -> a  -- ^ replacement
+  -> SmallArray a
+{-# INLINE replaceSmallArray #-}
 replaceSmallArray ar ind val = runST $ do
   let s = sizeOfSmallArray ar
   let clone = cloneSmallArray ar 0 s
